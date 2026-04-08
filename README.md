@@ -143,17 +143,19 @@ See [docs/AUTH.md](docs/AUTH.md) for the full deep dive.
 
 ## Initial Token Capture
 
-You need mitmproxy **once** to get the initial token.
+You need mitmproxy **once** to capture the initial VoiceIQ token. After that, use the browser-based refresh page.
 
-1. Install: `brew install mitmproxy` (macOS) or `pip install mitmproxy`
+**Quick version:**
+1. Install mitmproxy: `brew install mitmproxy` (macOS) or `pip install mitmproxy`
 2. Run: `mitmweb --listen-port 8080`
-3. Set your phone's WiFi proxy to your computer's IP:8080
-4. Visit `http://mitm.it` on phone, install CA cert
-5. iOS: Settings > General > About > Certificate Trust Settings > enable mitmproxy
-6. Open DFC@Home app, sign in
-7. In mitmweb, filter `device.deltafaucet.com`, copy the `Authorization: Bearer ...` token
-8. Also grab MAC address and user ID from `/api/user/v2/UserInfo` response
-9. Remove proxy from phone
+3. Set your phone's WiFi proxy to your computer's IP on port 8080
+4. Visit `http://mitm.it` on your phone, install and trust the CA certificate
+5. Open the DFC@Home app and sign in
+6. In mitmweb, filter for `device.deltafaucet.com` and copy the `Authorization: Bearer ...` token
+7. Also grab your MAC address and user ID from the `/api/user/v2/UserInfo` response
+8. Remove the proxy from your phone when done
+
+**For the full step-by-step guide with screenshots and troubleshooting, see [docs/MITMPROXY.md](docs/MITMPROXY.md).**
 
 ---
 

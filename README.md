@@ -302,4 +302,8 @@ automation:
 
 Not affiliated with Delta Faucet or Masco Corporation. Use at your own risk. Automated water control could cause flooding if misused.
 
+## Credits
+
+Dashboard card badge theme and animations inspired by [Anashost's HA Animated Cards](https://github.com/Anashost/HA-Animated-cards/blob/main/appliances.md). Huge thanks to [@Anashost](https://github.com/Anashost) for the incredible work on animated Mushroom card styling.
+
 MIT License.

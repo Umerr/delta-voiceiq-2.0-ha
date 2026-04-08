@@ -186,13 +186,13 @@ Copy each section from the package file into your existing `configuration.yaml`.
 
 ## Token Lifecycle: Expiry, Notification, and Refresh
 
-The VoiceIQ token lasts ~60 days with **no refresh token**. Here's the full lifecycle:
+The VoiceIQ token lasts ~60 days with **no refresh token**. Here is the full lifecycle:
 
-### How You'll Know It's Expiring
+### How You Will Know It Is Expiring
 
-1. **Dashboard badge:** The faucet card's popup shows a token status indicator with days remaining
+1. **Dashboard badge:** The faucet card popup shows a token status indicator with days remaining
 2. **Template sensor:** `sensor.delta_token_expiry` always shows the days left (e.g. "59 days")
-3. **Persistent notification:** An automation checks daily at 9:00 AM. When fewer than 7 days remain, you'll see a persistent notification in HA:
+3. **Persistent notification:** An automation checks daily at 9:00 AM. When fewer than 7 days remain, you will see a persistent notification in HA:
 
 > **Delta Faucet Token Expiring Soon**
 > Your Delta faucet API token expires in less than 7 days.
@@ -208,21 +208,21 @@ When you get the warning, or any time you want to refresh:
 
 2. Enter your HA **long-lived access token** in the connection settings
    - Create one at: your HA profile (click your name bottom-left) > Long-Lived Access Tokens > Create Token
-3. Click **Open Apple Sign-In** -- a new tab opens with Delta's login page
+3. Click **Open Apple Sign-In** -- a new tab opens with Delta login page
 4. Sign in with your Apple ID (or Google/Amazon)
 5. After authentication, the browser tries to redirect to `justaddwater://` and **fails** (this is expected)
 6. Your browser URL bar now shows something like: `justaddwater://?code=delta.code.XXXXX&state=YYY`
 7. **Copy the entire URL** from the address bar
 8. Paste it into the input field on the refresh page
 9. Click **Exchange Token**
-10. The page polls for status. Within ~10 seconds you'll see either:
+10. The page polls for status. Within ~10 seconds you will see either:
     - **Success:** "Token refreshed! Expires [date] ([days] days). Backup at secrets.yaml.bak"
     - **Error:** Details about what went wrong
 
 ### What Happens Behind the Scenes
 
 The shell script (`delta_token_exchange.sh`):
-1. Calls Delta's `PostAuth` endpoint with your code
+1. Calls Delta PostAuth endpoint with your code
 2. Captures the 302 redirect containing a base64-encoded JWT
 3. Decodes and validates the JWT
 4. Backs up `secrets.yaml` to `secrets.yaml.bak`
@@ -300,8 +300,29 @@ automation:
 
 Not affiliated with Delta Faucet or Masco Corporation. Use at your own risk. Automated water control could cause flooding if misused.
 
-## Credits
+## Credits and Acknowledgments
 
-Dashboard card badge theme and animations inspired by [Anashost's HA Animated Cards](https://github.com/Anashost/HA-Animated-cards/blob/main/appliances.md). Huge thanks to [@Anashost](https://github.com/Anashost) for the incredible work on animated Mushroom card styling.
+This project builds on the work of many talented developers in the Home Assistant community:
+
+**Dashboard Card Styling:**
+- [@Anashost](https://github.com/Anashost) - Dashboard card badge theme and water-fill animations inspired by [HA Animated Cards](https://github.com/Anashost/HA-Animated-cards/blob/main/appliances.md)
+
+**Required Custom Components:**
+- [@piitaya](https://github.com/piitaya) - [Mushroom Cards](https://github.com/piitaya/lovelace-mushroom) for the beautiful dashboard cards
+- [@thomasloven](https://github.com/thomasloven) - [card-mod](https://github.com/thomasloven/lovelace-card-mod) for CSS-based card customization
+- [@thomasloven](https://github.com/thomasloven) - [browser_mod](https://github.com/thomasloven/hass-browser_mod) for the popup functionality
+- [HACS](https://hacs.xyz) - Home Assistant Community Store for managing custom components
+
+**Tools Used:**
+- [mitmproxy](https://mitmproxy.org/) - Used for initial API reverse-engineering and token capture
+- [jwt.io](https://jwt.io) - For decoding and inspecting JWT tokens
+
+**Prior Art:**
+- [@evantobin](https://github.com/evantobin) - [homebridge-voiceiq](https://github.com/evantobin/homebridge-voiceiq) for Homebridge, which demonstrated VoiceIQ faucet control was possible via the API
+- [@pvmac2194](https://gist.github.com/pvmac2194) - [Delta VoiceIQ API gist](https://gist.github.com/pvmac2194/d1f8d6fcdecd7cef2843ad7ce138f1ce) for early API documentation
+
+**Built With:**
+- [Home Assistant](https://www.home-assistant.io/) - Open source home automation platform
+- [Delta VoiceIQ](https://www.deltafaucet.com/voiceiq) - Smart faucet technology by Delta Faucet Company
 
 MIT License.

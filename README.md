@@ -198,8 +198,6 @@ The VoiceIQ token lasts ~60 days with **no refresh token**. Here's the full life
 > Your Delta faucet API token expires in less than 7 days.
 > Visit /local/delta-refresh.html to refresh it.
 
-![Token Expiry Notification](docs/images/token-expiry-notification.png)
-
 ### How To Refresh (30 seconds)
 
 When you get the warning, or any time you want to refresh:

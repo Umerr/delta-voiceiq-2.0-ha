@@ -1,1 +1,15 @@
-mkdir -p docs/images packages www scripts dashboard
+# Secrets
+secrets.yaml
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+
+# Editors
+*.swp
+*.swo
+.vscode/
+.idea/

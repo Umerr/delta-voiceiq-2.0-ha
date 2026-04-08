@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delta VoiceIQ Token Refresh</title>
+<style>
+  :root { --bg: #1a1a2e; --card: #16213e; --accent: #0f3460; --blue: #53a8e2; --green: #4ecca3; --red: #e74c3c; --text: #e0e0e0; --muted: #8a8a9a; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .container { max-width: 520px; width: 100%; }
+  .card { background: var(--card); border-radius: 16px; padding: 32px; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.06); }
+  h1 { font-size: 22px; margin-bottom: 4px; display: flex; align-items: center; gap: 10px; }
+  h1 svg { width: 28px; height: 28px; fill: var(--blue); }
+  .subtitle { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
+  .step { display: flex; gap: 14px; margin-bottom: 20px; align-items: flex-start; }
+  .step-num { background: var(--accent); color: var(--blue); font-weight: 700; font-size: 14px; min-width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: 2px; }
+  .step-content { flex: 1; }
+  .step-content p { font-size: 14px; line-height: 1.5; }
+  .step-content code { background: rgba(83,168,226,0.12); color: var(--blue); padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-decoration: none; }
+  .btn-primary { background: var(--blue); color: #fff; }
+  .btn-primary:hover { background: #4a9ad4; transform: translateY(-1px); }
+  .btn-green { background: var(--green); color: #1a1a2e; }
+  .btn-green:hover { background: #45b892; transform: translateY(-1px); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .input-group { margin: 16px 0; }
+  .input-group label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .input-row { display: flex; gap: 8px; }
+  .input-row input { flex: 1; }
+  input[type="text"], input[type="password"] { width: 100%; padding: 12px 14px; background: var(--bg); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--text); font-size: 14px; font-family: 'SF Mono', 'Fira Code', monospace; }
+  input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(83,168,226,0.15); }
+  .status { padding: 14px 16px; border-radius: 10px; font-size: 13px; margin-top: 16px; display: none; line-height: 1.5; }
+  .status.info { display: block; background: rgba(83,168,226,0.1); border: 1px solid rgba(83,168,226,0.2); color: var(--blue); }
+  .status.success { display: block; background: rgba(78,204,163,0.1); border: 1px solid rgba(78,204,163,0.2); color: var(--green); }
+  .status.error { display: block; background: rgba(231,76,60,0.1); border: 1px solid rgba(231,76,60,0.2); color: var(--red); }
+  .token-info { background: var(--bg); border-radius: 10px; padding: 16px; margin-top: 16px; }
+  .token-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; font-size: 13px; }
+  .token-row .label { color: var(--muted); }
+  .token-row .value { font-weight: 600; }
+  .token-row .value.ok { color: var(--green); }
+  .token-row .value.warn { color: #f39c12; }
+  .token-row .value.danger { color: var(--red); }
+  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .divider { height: 1px; background: rgba(255,255,255,0.06); margin: 20px 0; }
+  .hidden { display: none !important; }
+  .ha-url-note { font-size: 11px; color: var(--muted); margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="card">
+    <h1>
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+      Delta VoiceIQ Token Refresh
+    </h1>
+    <p class="subtitle">Refresh your faucet API token without mitmproxy</p>
+
+    <div id="currentTokenInfo" class="token-info">
+      <div class="token-row">
+        <span class="label">Current Token Status</span>
+        <span class="value" id="tokenStatus">Checking...</span>
+      </div>
+      <div class="token-row">
+        <span class="label">Expires</span>
+        <span class="value" id="tokenExpiry">...</span>
+      </div>
+      <div class="token-row">
+        <span class="label">Days Remaining</span>
+        <span class="value" id="tokenDays">...</span>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <p>Click the button below to open Delta's Apple Sign-In page in a new tab.</p>
+        <br>
+        <button class="btn btn-primary" id="btnLogin" onclick="openLogin()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          Open Apple Sign-In
+        </button>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <p>Sign in with your Apple ID. After auth, the browser will try to redirect to <code>justaddwater://</code> and fail. Copy the <code>delta.code.XXXXX</code> value from the URL bar.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <p>Paste the full redirect URL or just the delta code below, then click "Exchange Token".</p>
+        <div class="input-group">
+          <label>Delta Auth Code</label>
+          <div class="input-row">
+            <input type="text" id="deltaCode" placeholder="justaddwater://?code=delta.code.XXXXX&state=YYY  or  delta.code.XXXXX" autocomplete="off" spellcheck="false">
+          </div>
+        </div>
+        <button class="btn btn-green" id="btnExchange" onclick="exchangeToken()">
+          Exchange Token
+        </button>
+      </div>
+    </div>
+
+    <div id="status" class="status"></div>
+  </div>
+
+  <div class="card">
+    <h1 style="font-size:16px;">HA Connection Settings</h1>
+    <p class="subtitle">Only needed if accessing this page outside of HA</p>
+    <div class="input-group">
+      <label>Home Assistant URL</label>
+      <input type="text" id="haUrl" placeholder="http://homeassistant.local:8123" value="">
+      <p class="ha-url-note">Leave blank if this page is served from HA itself (/local/delta-refresh.html)</p>
+    </div>
+    <div class="input-group">
+      <label>Long-Lived Access Token</label>
+      <input type="password" id="haToken" placeholder="eyJhbGciOi..." autocomplete="off">
+      <p class="ha-url-note">Create one in HA: Profile > Long-Lived Access Tokens. Required to call HA APIs.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// Generate random state for OAuth
+function randomState() {
+  const a = new Uint8Array(16);
+  crypto.getRandomValues(a);
+  return Array.from(a, b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// Open Delta Apple login
+function openLogin() {
+  const state = randomState();
+  const url = `https://device.deltafaucet.com/Auth/Login?provider=apple&response_type=code&scope=profile_email&state=${state}&redirect_uri=justaddwater://`;
+  window.open(url, '_blank');
+}
+
+// Parse delta code from pasted input (accepts full URL or just the code)
+function parseCode(input) {
+  input = input.trim();
+  // Full URL: justaddwater://?code=delta.code.XXXXX&state=YYY
+  if (input.includes('code=')) {
+    try {
+      const params = new URLSearchParams(input.split('?')[1]);
+      return params.get('code');
+    } catch(e) {}
+  }
+  // Just the code itself
+  if (input.startsWith('delta.code.')) return input;
+  return null;
+}
+
+// Get HA base URL
+function getHaBase() {
+  const custom = document.getElementById('haUrl').value.trim();
+  if (custom) return custom.replace(/\/+$/, '');
+  return window.location.origin;
+}
+
+// Get auth headers for HA API
+function getHaHeaders() {
+  const h = { 'Content-Type': 'application/json' };
+  const tok = document.getElementById('haToken').value.trim();
+  if (tok) h['Authorization'] = 'Bearer ' + tok;
+  return h;
+}
+
+// Show status message
+function showStatus(msg, type) {
+  const el = document.getElementById('status');
+  el.className = 'status ' + type;
+  el.innerHTML = msg;
+}
+
+// Exchange the delta code for a new token
+async function exchangeToken() {
+  const raw = document.getElementById('deltaCode').value;
+  const code = parseCode(raw);
+  if (!code) {
+    showStatus('Could not parse a delta code from your input. Paste the full URL from the address bar, or just the <code>delta.code.XXXXX</code> part.', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('btnExchange');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Exchanging...';
+  showStatus('Sending code to Home Assistant to call Delta PostAuth...', 'info');
+
+  try {
+    const base = getHaBase();
+    const headers = getHaHeaders();
+
+    // Call the HA shell_command or script that exchanges the code
+    // We use an input_text to pass the code, then fire the script
+    // Step 1: Set the code in input_text
+    const setCodeResp = await fetch(`${base}/api/services/input_text/set_value`, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({
+        entity_id: 'input_text.delta_auth_code',
+        value: code
+      })
+    });
+
+    if (!setCodeResp.ok) {
+      throw new Error(`Failed to set auth code in HA (${setCodeResp.status}). Check your HA URL and token.`);
+    }
+
+    // Step 2: Fire the token exchange script
+    const scriptResp = await fetch(`${base}/api/services/script/turn_on`, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({
+        entity_id: 'script.delta_token_exchange'
+      })
+    });
+
+    if (!scriptResp.ok) {
+      throw new Error(`Failed to trigger token exchange script (${scriptResp.status})`);
+    }
+
+    // Step 3: Poll input_text.delta_token_status until it changes from "Exchanging token..."
+    showStatus('<span class="spinner"></span> Waiting for token exchange to complete...', 'info');
+
+    let attempts = 0;
+    const maxAttempts = 20; // 20 x 1.5s = 30 seconds max
+    let finalStatus = '';
+
+    while (attempts < maxAttempts) {
+      await new Promise(r => setTimeout(r, 1500));
+      attempts++;
+      try {
+        const pollResp = await fetch(`${base}/api/states/input_text.delta_token_status`, { headers });
+        if (pollResp.ok) {
+          const pollData = await pollResp.json();
+          const st = pollData.state;
+          if (st !== 'Exchanging token...' && st !== '') {
+            finalStatus = st;
+            break;
+          }
+        }
+      } catch(e) { /* keep polling */ }
+    }
+
+    if (!finalStatus) {
+      finalStatus = 'ERROR: Timed out waiting for response (30s). Check HA logs.';
+    }
+
+    if (finalStatus.startsWith('OK')) {
+      showStatus(`Token refreshed successfully!<br><br>${finalStatus}<br><br>The new token has been saved to <code>secrets.yaml</code>. Restart HA or reload the REST integration for it to take effect.`, 'success');
+      setTimeout(loadTokenInfo, 3000);
+    } else if (finalStatus.startsWith('ERROR')) {
+      showStatus(`Token exchange failed:<br><br>${finalStatus}<br><br>The delta code may have expired. Try the process again from Step 1.`, 'error');
+    } else {
+      showStatus(`Status: ${finalStatus}<br><br>Check HA logs for details.`, 'info');
+    }
+  } catch (err) {
+    showStatus(`Error: ${err.message}`, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Exchange Token';
+  }
+}
+
+// Load current token info
+async function loadTokenInfo() {
+  try {
+    const base = getHaBase();
+    const headers = getHaHeaders();
+    const resp = await fetch(`${base}/api/states/sensor.delta_token_expiry`, { headers });
+    if (resp.ok) {
+      const data = await resp.json();
+      const daysStr = data.state; // e.g. "59 days"
+      const days = parseInt(daysStr);
+      document.getElementById('tokenDays').textContent = daysStr;
+      document.getElementById('tokenDays').className = 'value ' + (days > 14 ? 'ok' : days > 3 ? 'warn' : 'danger');
+
+      // Calculate expiry date from the known timestamp
+      const expTs = 1780809002;
+      const expDate = new Date(expTs * 1000);
+      document.getElementById('tokenExpiry').textContent = expDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+      if (days > 14) {
+        document.getElementById('tokenStatus').textContent = 'Valid';
+        document.getElementById('tokenStatus').className = 'value ok';
+      } else if (days > 0) {
+        document.getElementById('tokenStatus').textContent = 'Expiring Soon';
+        document.getElementById('tokenStatus').className = 'value warn';
+      } else {
+        document.getElementById('tokenStatus').textContent = 'Expired';
+        document.getElementById('tokenStatus').className = 'value danger';
+      }
+    }
+  } catch (e) {
+    document.getElementById('tokenStatus').textContent = 'Unable to fetch';
+    document.getElementById('tokenStatus').className = 'value';
+  }
+}
+
+// Init
+loadTokenInfo();
+</script>
+</body>
+</html>

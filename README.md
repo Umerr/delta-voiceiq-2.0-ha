@@ -1,0 +1,1 @@
+mkdir -p docs/images packages www scripts dashboard

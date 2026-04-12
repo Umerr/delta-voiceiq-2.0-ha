@@ -1,5 +1,5 @@
-#!/bin/bash
-# delta_token_exchange.sh
+#!/bin/sh
+# delta_token_exchange.sh (POSIX sh - no bash or python required)
 # Called by HA shell_command to exchange a Delta auth code for a new token.
 # Place at: /config/scripts/delta_token_exchange.sh
 # Make executable: chmod +x /config/scripts/delta_token_exchange.sh
@@ -7,13 +7,23 @@
 # Usage: delta_token_exchange.sh <delta_auth_code>
 #
 # What it does:
-#   1. Calls Delta PostAuth with the code
-#   2. Extracts the base64-encoded token JSON from the 302 redirect
-#   3. Decodes and extracts the accessToken (JWT)
-#   4. Updates secrets.yaml with the new token
-#   5. Updates the exp_ts in automations.yaml
-#   6. Writes result to /config/www/delta_token_status.txt
-
+#   1. Calls Delta PostAuth with the auth code
+#   2. Captures the 302 redirect containing a base64-encoded JSON payload
+#   3. Decodes the double-encoded accessToken (base64 > JSON > base64 > JWT)
+#   4. Validates the JWT format and extracts the expiry timestamp
+#   5. Backs up and updates secrets.yaml with the new token
+#   6. Updates the exp_ts in automations.yaml and configuration.yaml
+#   7. Reports status via the HA Supervisor API and /config/www/delta_token_status.txt
+#
+# Requirements:
+#   - POSIX sh (available in HA Core Alpine container)
+#   - curl, sed, awk, base64, date (all available in Alpine)
+#   - No bash or python needed
+#
+# Troubleshooting:
+#   - Check log: cat /config/www/delta_token_exchange.log
+#   - Check status: cat /config/www/delta_token_status.txt
+#   - Test manually: /bin/sh /config/scripts/delta_token_exchange.sh "delta.code.XXXXX"
 
 CODE="$1"
 SECRETS_FILE="/config/secrets.yaml"

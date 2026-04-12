@@ -201,28 +201,28 @@ The VoiceIQ token lasts ~60 days with **no refresh token**. Here is the full lif
 ### How To Refresh (30 seconds)
 
 **Prerequisites (one-time setup):**
-- Create a **Long-Lived Access Token** in HA: click your profile icon (bottom left) > scroll to bottom > Long-Lived Access Tokens > Create Token > save the token somewhere safe
+- Create a **Long-Lived Access Token** in HA: click your profile icon (bottom left) > scroll to bottom > Long-Lived Access Tokens > Create Token. **Save this token somewhere safe** (password manager, notes app, etc.) as HA only shows it once. You will need it every time you refresh.
 - Make the shell script executable: in Terminal & SSH add-on, run `chmod +x /config/scripts/delta_token_exchange.sh`
 
 **Refresh steps:**
 
 1. Open **Chrome on your Mac** (Safari does not work reliably for this flow) and go to `http://<your-ha-ip>:8123/local/delta-refresh.html`
 
-2. **First time only:** Fill in the **Step 0: HA Connection Settings** at the top of the page. Enter your HA URL and paste your Long-Lived Access Token. These fields must be populated or the exchange will fail with a 401 error.
+2. Fill in the **Step 0: HA Connection Settings** at the top of the page with your HA URL and Long-Lived Access Token. The page saves these in your browser so you only need to enter them once per browser. If you clear your browser data or use a different browser, you will need to enter them again.
 
 ![Token Refresh Page](docs/images/token-refresh-page.png)
 
-3. **Open Chrome DevTools** before signing in: right-click anywhere on the page > **Inspect** > click the **Console** tab. Keep this open.
+3. Click your sign-in provider (Apple, Google, or Amazon) to open Delta's login page in a **new tab**
 
-4. Click your sign-in provider (Apple, Google, or Amazon) to open Delta's login page in a new tab
+4. **In the new tab that opened**, open Chrome DevTools: right-click anywhere > **Inspect** > click the **Console** tab. Keep this open.
 
 5. Sign in with your credentials (passkey, password, etc.)
 
-6. After authentication, Delta tries to redirect to `justaddwater://` which fails. The redirect URL containing your delta code will appear in Chrome's **Console** tab (not the address bar). Look for a line containing `justaddwater://?code=delta.code.XXXXX&state=YYY`
+6. **For Apple Sign-In:** After authenticating, you will see a page asking "Do you want to continue using Delta Faucet Cloud with your Apple Account?" Click **Continue**. The page will appear to do nothing, but the redirect URL with your delta code will appear in the **Console** tab.
 
-7. **Copy the full URL** from the console (or just the `delta.code.XXXXX` part)
+7. Look in the Console for a line containing `justaddwater://?code=delta.code.XXXXX&state=YYY`. Copy the full URL or just the `delta.code.XXXXX` part.
 
-8. Paste it into the Delta Auth Code field on the refresh page
+8. Go back to the refresh page tab, paste it into the Delta Auth Code field
 
 9. Click **Exchange Token**
 
@@ -232,11 +232,12 @@ The VoiceIQ token lasts ~60 days with **no refresh token**. Here is the full lif
 
 11. **Restart HA** for the new token to take effect
 
-**Important browser notes:**
-- **Chrome is required.** Safari does not work reliably for this flow on any platform (Mac, iOS, iPad). Safari either dismisses the redirect URL too quickly or hands it off to the DFC@Home app.
-- **You must open DevTools (Inspect > Console)** before signing in. The `justaddwater://` redirect URL with your delta code appears in the console output, not in the address bar.
-- **Apple Sign-In with Hide My Email:** If you used Apple's "Hide My Email" when creating your Delta account, you can only sign in on devices where your Apple ID keychain/passkey is available. In Chrome, use the "Sign in with passkey from nearby device" option which authenticates via your iPhone's Face ID/Touch ID.
-- **Apple rate limiting:** If you see "Your request could not be completed because of an error" from Apple, wait 10-15 minutes. Apple rate-limits rapid authentication attempts.
+**Important notes:**
+- **Chrome only.** Safari does not work on any platform (Mac, iOS, iPad).
+- **DevTools must be open on the sign-in tab** (the new tab that opens after clicking Apple/Google/Amazon), not the refresh page tab.
+- **This integration has been tested with Apple Sign-In.** Google and Amazon sign-in should work the same way but have not been tested. If you test with Google or Amazon, please open an issue with your results.
+- **Apple Sign-In with Hide My Email:** If you used Apple's "Hide My Email", you can only sign in on devices where your Apple ID keychain/passkey is available. In Chrome, use the "Sign in with passkey from nearby device" option which authenticates via your iPhone's Face ID/Touch ID.
+- **Apple rate limiting:** If you see "Your request could not be completed because of an error", wait 10-15 minutes. Apple rate-limits rapid authentication attempts.
 
 ### What Happens Behind the Scenes
 

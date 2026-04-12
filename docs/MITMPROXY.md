@@ -38,15 +38,6 @@ Download the installer from https://mitmproxy.org/ and run it.
 pip install mitmproxy
 ```
 
-Or use your package manager:
-```bash
-# Ubuntu/Debian
-sudo apt install mitmproxy
-
-# Fedora
-sudo dnf install mitmproxy
-```
-
 ---
 
 ## Step 2: Start mitmproxy
@@ -61,11 +52,9 @@ This starts two things:
 - A proxy server on port 8080
 - A web interface that opens in your browser at `http://127.0.0.1:8081`
 
-Leave this running. The web interface is where you'll see all the intercepted traffic.
+Leave this running.
 
 ### Find Your Computer's IP Address
-
-You'll need your computer's local IP address for the next step.
 
 **macOS:**
 ```bash
@@ -83,7 +72,7 @@ Look for "IPv4 Address" under your WiFi adapter.
 hostname -I
 ```
 
-Write down this IP (e.g., `192.168.1.100`). You'll use it in the next step.
+Write down this IP (e.g., `192.168.1.100`).
 
 ---
 
@@ -99,7 +88,7 @@ Write down this IP (e.g., `192.168.1.100`). You'll use it in the next step.
    - Server: your computer's IP (e.g., `192.168.1.100`)
    - Port: `8080`
    - Authentication: Off
-6. Tap **Save** (top right)
+6. Tap **Save**
 
 ### Android
 
@@ -119,20 +108,17 @@ Write down this IP (e.g., `192.168.1.100`). You'll use it in the next step.
 Your phone needs to trust mitmproxy's certificate to intercept HTTPS traffic.
 
 1. On your phone's browser, go to: **http://mitm.it**
-2. You should see a page with download buttons for different platforms
-3. Tap the button for your platform (Apple or Android)
+2. Tap the button for your platform (Apple or Android)
 
 ### iOS Certificate Setup
 
-1. After downloading, go to **Settings > General > VPN & Device Management** (or "Profiles" on older iOS)
-2. You'll see "mitmproxy" listed under Downloaded Profile
-3. Tap it, then tap **Install** (enter your passcode if prompted)
-4. Tap **Install** again to confirm
-5. **IMPORTANT:** Now go to **Settings > General > About > Certificate Trust Settings**
-6. Find "mitmproxy" and **toggle it ON**
-7. Confirm by tapping **Continue**
+1. After downloading, go to **Settings > General > VPN & Device Management**
+2. Tap "mitmproxy", then tap **Install**
+3. **IMPORTANT:** Now go to **Settings > General > About > Certificate Trust Settings**
+4. Find "mitmproxy" and **toggle it ON**
+5. Confirm by tapping **Continue**
 
-Without step 5-7, HTTPS interception will not work on iOS.
+Without steps 3-5, HTTPS interception will not work on iOS.
 
 ### Android Certificate Setup
 
@@ -140,75 +126,63 @@ Without step 5-7, HTTPS interception will not work on iOS.
 2. Go to **Settings > Security > Encryption & credentials > Install a certificate**
 3. Select **CA certificate**
 4. Find and select the downloaded mitmproxy certificate
-5. Confirm the installation
 
 ---
 
 ## Step 5: Verify the Proxy Works
 
-Before opening the DFC@Home app, verify everything is working:
-
-1. On your phone, open any website in Safari/Chrome (e.g., `https://google.com`)
+1. On your phone, open any website (e.g., `https://google.com`)
 2. Look at the mitmweb interface on your computer (`http://127.0.0.1:8081`)
-3. You should see requests appearing in the flow list
+3. You should see requests appearing
 
-If you see requests, the proxy is working. If not, double-check:
-- Both devices are on the same WiFi network
-- The proxy IP and port are correct
-- The certificate is installed AND trusted
+If you see requests, the proxy is working.
 
 ---
 
 ## Step 6: Capture the Token
 
 1. On your phone, open the **DFC@Home** app
-2. Sign in to your account (or just open the app if already signed in)
-3. Navigate around the app (view your faucet, check usage, etc.) to generate API traffic
+2. Sign in or navigate around to generate API traffic
 
-4. On your computer, in the mitmweb interface:
+3. On your computer, in the mitmweb interface:
    - Click the **Search/Filter** bar at the top
    - Type: `device.deltafaucet.com`
-   - Press Enter to filter
+   - Press Enter
 
-5. You should see several requests to `device.deltafaucet.com`. Click on any one of them.
+4. Click on any request. In the **Request** tab, look at **Headers**
 
-6. In the request details panel, look at the **Request** tab, then **Headers**
-
-7. Find the `Authorization` header. It will look like:
+5. Find the `Authorization` header:
    ```
    Authorization: Bearer eyJhbGciOiJSUzI1NiIsIn...very_long_string
    ```
 
-8. **Copy the entire value after "Bearer "** (the long string starting with `eyJ`). This is your VoiceIQ JWT token.
+6. **Copy the entire value after "Bearer "**. This is your VoiceIQ JWT token.
 
 ---
 
 ## Step 7: Capture Your Device Info
 
-While you have the traffic captured, you also need your faucet's MAC address and user ID.
-
 1. In mitmweb, look for a request to `/api/user/v2/UserInfo`
 2. Click on it, then click the **Response** tab
 3. In the response body (JSON), find:
    - `macAddress` - your faucet's MAC address (e.g., `C8F5D6604AA0`)
-   - `userId` - your VoiceIQ user ID (a hex string)
-   - `containers` - your custom dispense containers and their sizes
-   - `modes` - your custom modes (hand wash, etc.)
+   - `userId` - your VoiceIQ user ID
+   - `containers` - your custom dispense containers
+   - `modes` - your custom modes
 
-Write down the MAC address and user ID. You'll need them for the Home Assistant setup.
+Write down the MAC address and user ID.
 
 ---
 
 ## Step 8: Verify Your Token
 
-Go to https://jwt.io and paste your token in the "Encoded" field on the left.
+Go to https://jwt.io and paste your token.
 
-In the decoded payload on the right, verify:
-- `aud` (audience) is `device.deltafaucet.com`
-- `exp` (expiration) is a Unix timestamp approximately 60 days in the future
-- The token has not expired
+In the decoded payload, verify:
+- `aud` is `device.deltafaucet.com`
+- `exp` is approximately 60 days in the future
 
-You can convert the `exp` timestamp to a readable date:
+Convert the `exp` timestamp:
 ```bash
 # macOS
 date -r 1780809002
@@ -221,44 +195,38 @@ date -d @1780809002
 
 ## Step 9: Clean Up
 
-**IMPORTANT: Remove the proxy from your phone after you're done.**
+**IMPORTANT: Remove the proxy from your phone.**
 
 ### iOS
-1. Settings > Wi-Fi > tap (i) on your network > HTTP Proxy > Off
+Settings > Wi-Fi > tap (i) on your network > HTTP Proxy > Off
 
 ### Android
-1. Settings > Wi-Fi > long-press network > Modify > Advanced > Proxy > None
+Settings > Wi-Fi > long-press network > Modify > Advanced > Proxy > None
 
 ### Optional: Remove the Certificate
 
-If you want to remove the mitmproxy certificate from your phone:
-
 **iOS:** Settings > General > VPN & Device Management > mitmproxy > Remove Profile
 
-**Android:** Settings > Security > Encryption & credentials > Trusted credentials > User tab > mitmproxy > Remove
+**Android:** Settings > Security > Trusted credentials > User tab > mitmproxy > Remove
 
 ### Stop mitmproxy
-
-In your terminal, press `Ctrl+C` to stop mitmproxy.
+In your terminal, press `Ctrl+C`.
 
 ---
 
 ## Troubleshooting
 
-**"mitm.it" shows a blank page or error:**
-The proxy isn't working. Check that your phone's proxy settings point to the correct IP and port 8080, and that both devices are on the same WiFi.
+**"mitm.it" shows a blank page:**
+The proxy isn't working. Check that your phone's proxy settings point to the correct IP and port 8080.
 
-**Requests show up but all are "connection error":**
+**Requests show "connection error":**
 The certificate isn't trusted. On iOS, make sure you completed the trust step in Settings > General > About > Certificate Trust Settings.
 
 **No requests to device.deltafaucet.com:**
-The DFC@Home app may be using certificate pinning on newer versions. Try:
-- Force-closing and reopening the app
-- Signing out and back in
-- If the app refuses to connect entirely, it may have certificate pinning that blocks mitmproxy
+Force-close and reopen the DFC@Home app. Sign out and back in.
 
-**Token expired or about to expire:**
-Tokens last approximately 60 days. After the initial capture, use the browser-based refresh page at `/local/delta-refresh.html` instead of mitmproxy.
+**Token expired:**
+Tokens last approximately 60 days. After initial capture, use the browser-based refresh page instead of mitmproxy.
 
 ---
 

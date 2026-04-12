@@ -265,6 +265,19 @@ The card uses Mushroom + card-mod for animated water-fill effects.
 
 **Important:** browser_mod must be added as an integration (Settings > Devices & Services > Add Integration > Browser Mod), not just installed via HACS.
 
+### Usage Sensor Polling Schedule
+
+The usage sensors automatically poll the Delta API on a regular schedule. No manual refresh needed.
+
+| Sensor | Poll Interval |
+|--------|--------------|
+| Today's usage | Every 10 minutes |
+| Weekly usage | Every 1 hour |
+| Monthly usage | Every 5 hours |
+| Yearly usage | Every 24 hours |
+
+After an HA restart, sensors will show "unknown" briefly until their first poll cycle completes (up to 10 minutes for the daily sensor). This is normal and resolves automatically.
+
 ---
 
 ## Example Automations

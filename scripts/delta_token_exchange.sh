@@ -129,22 +129,9 @@ ACCESS_TOKEN=$(echo "$ACCESS_TOKEN" | tr -d '[:space:]')
 
 log "Extracted token preview: $(echo "$ACCESS_TOKEN" | head -c 50)..."
 
-# Check if token is base64-encoded (starts with uppercase letters, no dots)
-# A JWT starts with eyJ, but if double-encoded it starts with ZXlK or similar
-DOT_CHECK=$(echo "$ACCESS_TOKEN" | tr -cd '.' | wc -c | tr -d ' ')
-if [ "$DOT_CHECK" -eq 0 ]; then
-  log "Token appears base64-encoded, decoding again..."
-  # Add padding if needed
-  TMOD=$(( $(echo -n "$ACCESS_TOKEN" | wc -c | tr -d ' ') % 4 ))
-  TPADDED="$ACCESS_TOKEN"
-  if [ "$TMOD" -eq 2 ]; then
-    TPADDED="${TPADDED}=="
-  elif [ "$TMOD" -eq 3 ]; then
-    TPADDED="${TPADDED}="
-  fi
-  ACCESS_TOKEN=$(echo "$TPADDED" | tr '_-' '/+' | base64 -d 2>/dev/null)
-  log "Double-decoded token preview: $(echo "$ACCESS_TOKEN" | head -c 50)..."
-fi
+# Note: Delta's API expects the base64-encoded token, NOT the decoded JWT.
+# Do NOT base64 decode a second time. The token as extracted from the JSON
+# is the correct format to use with the API.
 
 ACCESS_TOKEN=$(echo "$ACCESS_TOKEN" | tr -d '[:space:]')
 
@@ -155,15 +142,21 @@ fi
 
 log "Token extracted, length: $(echo -n "$ACCESS_TOKEN" | wc -c | tr -d ' ')"
 
-# Validate JWT format (must contain exactly 2 dots)
-DOT_COUNT=$(echo "$ACCESS_TOKEN" | tr -cd '.' | wc -c | tr -d ' ')
-if [ "$DOT_COUNT" -ne 2 ]; then
-  write_status "ERROR: Token not a valid JWT (expected 2 dots, got ${DOT_COUNT})"
+# Validate token is not empty and has reasonable length
+TOKEN_LEN=$(echo -n "$ACCESS_TOKEN" | wc -c | tr -d ' ')
+if [ "$TOKEN_LEN" -lt 100 ]; then
+  write_status "ERROR: Token too short (${TOKEN_LEN} chars), likely extraction failed"
   exit 1
 fi
 
-# Step 6: Extract expiry from JWT payload (middle segment)
-JWT_PAYLOAD=$(echo "$ACCESS_TOKEN" | cut -d. -f2)
+# Step 6: Extract expiry from the token
+# First decode the base64 token to get the JWT, then decode the JWT payload
+TMOD=$(( $(echo -n "$ACCESS_TOKEN" | wc -c | tr -d ' ') % 4 ))
+TPADDED="$ACCESS_TOKEN"
+[ "$TMOD" -eq 2 ] && TPADDED="${TPADDED}=="
+[ "$TMOD" -eq 3 ] && TPADDED="${TPADDED}="
+TEMP_JWT=$(echo "$TPADDED" | tr '_-' '/+' | base64 -d 2>/dev/null)
+JWT_PAYLOAD=$(echo "$TEMP_JWT" | cut -d. -f2)
 # Add padding
 JMOD=$(( $(echo -n "$JWT_PAYLOAD" | wc -c | tr -d ' ') % 4 ))
 if [ "$JMOD" -eq 2 ]; then

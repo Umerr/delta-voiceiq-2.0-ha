@@ -5,7 +5,7 @@
 [![HACS](https://img.shields.io/badge/HACS-Required-orange)](https://hacs.xyz)
 [![VoiceIQ](https://img.shields.io/badge/VoiceIQ-Gen%202-green)](https://www.deltafaucet.com/voiceiq)
 
-> A complete integration of **Delta VoiceIQ Version 2** smart faucets with Home Assistant. Control your faucet, dispense precise amounts, track water usage, and manage auth tokens -- all without the official app.
+> A complete reverse-engineered integration of **Delta VoiceIQ Version 2** smart faucets with Home Assistant. Control your faucet, dispense precise amounts, track water usage, and manage auth tokens -- all without the official app.
 
 ## What This Does
 
@@ -261,7 +261,16 @@ If the token expires before you refresh, your REST commands will return 401 erro
 
 The card uses Mushroom + card-mod for animated water-fill effects.
 - **Tap** = toggle on/off
-- **Long press** = popup with dispense buttons, usage stats, history
+- **Long press** = open popup with dispense buttons, usage stats, history
+
+**To add the card to your dashboard:**
+1. Open your dashboard, click the three dots menu > Edit Dashboard
+2. Navigate to the section where you want the card
+3. Click + Add Card > search for "Manual" or "YAML"
+4. Paste the contents of [`dashboard/card.yaml`](dashboard/card.yaml)
+5. Save
+
+The card YAML includes the complete configuration with animated water-fill styling, the browser_mod popup, dispense buttons, usage stats, history graph, and token expiry indicator. Customize the container names, sizes (in ml), and icons to match your faucet's setup.
 
 **Important:** browser_mod must be added as an integration (Settings > Devices & Services > Add Integration > Browser Mod), not just installed via HACS.
 

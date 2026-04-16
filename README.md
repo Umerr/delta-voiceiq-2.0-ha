@@ -153,6 +153,12 @@ You need mitmproxy **once** to capture the initial VoiceIQ token. After that, us
 7. Also grab your MAC address and user ID from the `/api/user/v2/UserInfo` response
 8. Remove the proxy from your phone when done
 
+**Important: Token format.** The token captured from mitmproxy is a **base64-encoded JWT**, not a raw JWT. When you save it to `secrets.yaml`, use it exactly as captured (with the `Bearer` prefix):
+```yaml
+delta_token: "Bearer ZXlKaGJHY2lPaUpJ..."
+```
+Do NOT decode the base64 first. Delta's API expects the base64-encoded version. If you want to check the token's expiry date, decode the base64 string first, then paste the resulting JWT into [jwt.io](https://jwt.io).
+
 **For the full step-by-step guide with troubleshooting, see [docs/MITMPROXY.md](docs/MITMPROXY.md).**
 
 ---
@@ -235,7 +241,7 @@ The VoiceIQ token lasts ~60 days with **no refresh token**. Here is the full lif
 **Important notes:**
 - **Chrome only.** Safari does not work on any platform (Mac, iOS, iPad).
 - **DevTools must be open on the sign-in tab** (the new tab that opens after clicking Apple/Google/Amazon), not the refresh page tab.
-- **This integration has been tested with Apple Sign-In.** Google and Amazon sign-in should work the same way but have not been tested. If you test with Google or Amazon, please open an issue with your results.
+- **This integration has been tested with Apple Sign-In and confirmed working with Amazon Sign-In** (thanks to community feedback). Google Sign-In should work the same way but has not been tested yet. If you test with Google, please open an issue with your results.
 - **Apple Sign-In with Hide My Email:** If you used Apple's "Hide My Email", you can only sign in on devices where your Apple ID keychain/passkey is available. In Chrome, use the "Sign in with passkey from nearby device" option which authenticates via your iPhone's Face ID/Touch ID.
 - **Apple rate limiting:** If you see "Your request could not be completed because of an error", wait 10-15 minutes. Apple rate-limits rapid authentication attempts.
 

@@ -241,7 +241,7 @@ The VoiceIQ token lasts ~60 days with **no refresh token**. Here is the full lif
 **Important notes:**
 - **Chrome only.** Safari does not work on any platform (Mac, iOS, iPad).
 - **DevTools must be open on the sign-in tab** (the new tab that opens after clicking Apple/Google/Amazon), not the refresh page tab.
-- **This integration has been tested with Apple Sign-In and confirmed working with Amazon Sign-In** (thanks to community feedback). Google Sign-In should work the same way but has not been tested yet. If you test with Google, please open an issue with your results.
+- **This integration has been tested with Apple Sign-In and confirmed working with Amazon Sign-In** (thanks to community feedback u/Next_Drive9802). Google Sign-In should work the same way but has not been tested yet. If you test with Google, please open an issue with your results.
 - **Apple Sign-In with Hide My Email:** If you used Apple's "Hide My Email", you can only sign in on devices where your Apple ID keychain/passkey is available. In Chrome, use the "Sign in with passkey from nearby device" option which authenticates via your iPhone's Face ID/Touch ID.
 - **Apple rate limiting:** If you see "Your request could not be completed because of an error", wait 10-15 minutes. Apple rate-limits rapid authentication attempts.
 

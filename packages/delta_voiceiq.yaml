@@ -1,6 +1,6 @@
 # =============================================================================
 # Delta VoiceIQ 2.0 - Home Assistant Package
-# https://github.com/YOUR_USERNAME/delta-voiceiq-2.0-ha
+# https://github.com/Umerr/delta-voiceiq-2.0-ha
 # =============================================================================
 # Drop this file into /config/packages/ and enable packages in configuration.yaml:
 #
@@ -8,7 +8,7 @@
 #     packages: !include_dir_named packages
 #
 # Required secrets.yaml entries:
-#   delta_token: "Bearer eyJhbGciOi..."
+#   delta_token: "Bearer ZXlKaGJHY2lP..."  (base64-encoded JWT, NOT decoded)
 #   delta_mac_address: "YOUR_MAC_ADDRESS"
 #   delta_user_id: "YOUR_USER_ID"
 #
@@ -31,11 +31,13 @@ input_text:
   delta_mac_address:
     name: Delta Faucet MAC Address
     icon: mdi:wifi
+    initial: !secret delta_mac_address
     max: 20
   delta_user_id:
     name: Delta User ID
     icon: mdi:account
-    max: 40
+    initial: !secret delta_user_id
+    max: 50
   delta_auth_code:
     name: Delta Auth Code
     icon: mdi:key-variant
@@ -178,6 +180,7 @@ sensor:
 # Template Sensor (Token Expiry)
 # ------------------------------------
 # IMPORTANT: Replace the exp_ts value below with the 'exp' claim from your JWT.
+# To find it: base64 decode your token, then paste the JWT into jwt.io.
 # The token exchange script updates this automatically after a refresh.
 
 template:
@@ -192,6 +195,7 @@ template:
 # ------------------------------------
 # Shell Command (Token Refresh)
 # ------------------------------------
+# Uses /bin/sh (not bash) because HAOS core container doesn't have bash.
 
 shell_command:
   delta_token_exchange: >
@@ -203,6 +207,7 @@ shell_command:
 # Automation (Token Expiry Warning)
 # ------------------------------------
 # IMPORTANT: Replace exp_ts with the 'exp' claim from your JWT.
+# The token exchange script updates this automatically after a refresh.
 
 automation:
   - id: delta_token_expiry_warning
@@ -214,7 +219,7 @@ automation:
     condition:
       - condition: template
         value_template: >
-          {% set exp_ts = 1780809002 %}
+          {% set exp_ts = 0000000000 %}
           {% set days_left = ((exp_ts - as_timestamp(now())) / 86400) | int %}
           {{ days_left < 7 }}
     action:

@@ -48,17 +48,6 @@ input_text:
     mode: text
     initial: "No refresh attempted"
 
-input_select:
-  delta_faucet_dispense_preset:
-    name: Delta Faucet Dispense Preset
-    icon: mdi:cup-water
-    options:
-      - "None"
-      - "Glass (355ml / 12oz)"
-      - "Coffee Pot (946ml / 4 cups)"
-      - "Sink (11356ml / 3 gal)"
-      - "Custom"
-
 input_number:
   delta_faucet_custom_dispense:
     name: Delta Faucet Custom Dispense
@@ -206,7 +195,7 @@ template:
 
 shell_command:
   delta_token_exchange: >
-    bash /config/scripts/delta_token_exchange.sh
+    /bin/sh /config/scripts/delta_token_exchange.sh
     '{{ states("input_text.delta_auth_code") }}'
 
 
